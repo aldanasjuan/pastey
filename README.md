@@ -28,4 +28,4 @@ ctrl+alt+3=goodbye
 - alt+backspace (exits the program)
 
 ## TODO:
-- [] - Reload config file
+- [ ] Reload config file
