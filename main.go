@@ -1,14 +1,16 @@
 package main
 
 import (
-	"aldanasjuan/pastey/codes"
 	"bytes"
 	"fmt"
 	"os"
+	"runtime"
 	"syscall"
+	"time"
 	"unsafe"
 
-	"golang.design/x/clipboard"
+	"github.com/atotto/clipboard"
+	"github.com/micmonay/keybd_event"
 )
 
 const (
@@ -16,6 +18,8 @@ const (
 	ModCtrl
 	ModShift
 	ModWin
+	KEY_EXIT   = -1
+	KEY_RELOAD = -2
 )
 
 type Hotkey struct {
@@ -46,6 +50,16 @@ func (h *Hotkey) String() string {
 }
 
 func main() {
+	runtime.LockOSThread()
+	kb, err := keybd_event.NewKeyBonding()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	// For linux, it is very important to wait 2 seconds
+	if runtime.GOOS == "linux" {
+		time.Sleep(2 * time.Second)
+	}
 	path := "./keys.config"
 	if len(os.Args) > 1 {
 		fmt.Println(os.Args[1])
@@ -64,13 +78,32 @@ func main() {
 		fmt.Println(err)
 		return
 	}
-	c := make(chan int)
+	c := make(chan int, 2)
 	go func() {
 		for s := range c {
 			for _, key := range keys {
 				if key.Id == s {
+					if key.Id == KEY_RELOAD {
 
-					clipboard.Write(clipboard.FmtText, key.Value)
+					} else {
+						clipboard.WriteAll(string(key.Value))
+						kb.Clear()
+						time.Sleep(150 * time.Millisecond)
+						kb.AddKey(keybd_event.VK_V)
+						kb.HasCTRL(true)
+						err = kb.Press()
+						if err != nil {
+							fmt.Println(err)
+							continue
+						}
+						time.Sleep(10 * time.Millisecond)
+						err = kb.Release()
+						if err != nil {
+							fmt.Println(err)
+							continue
+						}
+					}
+					// clipboard.Write(clipboard.FmtText, key.Value)
 				}
 			}
 
@@ -88,18 +121,18 @@ func main() {
 	// 	3: {3, ModCtrl + ModAlt, '3', 0},              // ALT+CTRL+X
 	// 	4: {-1, ModAlt, codes.GetKey("backspace"), 0}, // ALT+CTRL+X
 	// }
-	keys = append(keys, Hotkey{-1, ModAlt, codes.GetKey("backspace"), []byte{}, "alt+backspace"})
 
 	// Register hotkeys:
 	for _, v := range keys {
 		r1, _, err := reghotkey.Call(
 			0, uintptr(v.Id), uintptr(v.Modifiers), uintptr(v.KeyCode))
 		if r1 == 1 {
-			if v.Id == -1 {
-				fmt.Println("Registered", v.Text, "(exit program)")
+			if v.Id == KEY_EXIT {
+				fmt.Printf("Registered %v (exit program)\n", v.Text)
+			} else if v.Id == KEY_RELOAD {
+				fmt.Printf("Registered %v (reload config file)\n", v.Text)
 			} else {
-				fmt.Println("Registered", v.Text)
-
+				fmt.Printf("Registered %v with %v\n", v.Text, string(v.Value))
 			}
 		} else {
 			fmt.Println("Failed to register", v.Text, ", error:", err)

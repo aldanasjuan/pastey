@@ -41,7 +41,7 @@ func ParseFile(path string) ([]Hotkey, error) {
 	scanner := bufio.NewScanner(f)
 
 	l := 0
-	keys := []Hotkey{}
+	keys := []Hotkey{{-1, ModAlt, codes.GetKey("backspace"), []byte{}, "alt+backspace"}}
 	for scanner.Scan() {
 		l++
 		s := bytes.TrimSpace(scanner.Bytes())
