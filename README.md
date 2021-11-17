@@ -27,8 +27,9 @@ ctrl+alt+3=goodbye
 
 - alt+backspace (exits the program)
 
-#### Note
-You can't register the same hotkey twice and if you register existing hotkeys, they will be overridden while the program runs. For example, ctrl+v would not work as regular paste, so be careful. 
+## Notes
+- You can't register the same hotkey twice. 
+- If you register existing hotkeys, they will be overridden while the program runs. For example, ctrl+v would not work as regular paste, so be careful. 
 
 ## TODO:
 - [ ] Reload config file
