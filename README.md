@@ -10,7 +10,7 @@ Little program to paste information with custom hotkeys. For example, ctrl+alt+1
 
 ## Sintax
 
-- Add your modifiers (alt, ctrl, shift and win), joined with a '+' sign. 
+- Add your modifiers (only "alt", "ctrl", "shift" and "win" allowed), joined with a '+' sign. 
 - After the modifiers the desired key like "1", "backspace", etc. (view the the file "key-list.txt" for the full list of keys). For numbers enter "1" instead of "one", the program will convert it properly. 
 - Add a '=' sign
 - Add your value to paste
@@ -26,6 +26,9 @@ ctrl+alt+3=goodbye
 ## Reserved hotkeys
 
 - alt+backspace (exits the program)
+
+#### Note
+You can't register the same hotkey twice and if you register existing hotkeys, they will be overridden while the program runs. For example, ctrl+v would not work as regular paste, so be careful. 
 
 ## TODO:
 - [ ] Reload config file
